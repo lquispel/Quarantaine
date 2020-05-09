@@ -22,16 +22,19 @@ class Simulator:
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
         if self.config["UI"].getboolean("verbose"):
-            print("Starting Quarantaine with " + config_file)
+            print("Qu: Starting Quarantaine with " + config_file)
         self._active_network = 0
         self._active_model = 0
 
     def plot_networks(self):
-        # Network plotting
+        if self.config["UI"].getboolean("verbose"):
+            print("Qu: Plotting networks ... ")
         nx.draw(self._active_network, with_labels=True)
         plt.show()
 
     def plot_trends(self,iterations):
+        if self.config["UI"].getboolean("verbose"):
+            print("Qu: Plotting trends ... ")
         trends = self._active_model.build_trends(iterations)
         viz = DiffusionTrend(self._active_model, trends)
         p = viz.plot(width=400, height=400)
@@ -44,6 +47,8 @@ class Simulator:
         show(m)
 
     def create_network(self,type,nodes,connectivity,configfile=0):
+        if self.config["UI"].getboolean("verbose"):
+            print("Qu: Creating network ...  ")
         # Network Definition
         if configfile != 0:
             generator = network_configurator.Network_Configurator()
@@ -56,6 +61,8 @@ class Simulator:
         return self._active_network
 
     def create_model(self,model_type,network):
+        if self.config["UI"].getboolean("verbose"):
+            print("Qu: Creating model ...  ")
         # Model Selection
         if model_type == 'SIR':
             self._active_model = ep.SIRModel(network)
@@ -70,21 +77,27 @@ class Simulator:
         return self._active_model
 
     def run(self,nr_iterations):
+        if self.config["UI"].getboolean("verbose"):
+            print("Qu: Running model on network ... ")
         if self._active_model == 0:
+            if self.config["UI"].getboolean("verbose"):
+                print("Qu: !!! Run aborted, no active model  ")
             return False
         if self._active_network == 0:
+            if self.config["UI"].getboolean("verbose"):
+                print("Qu: !!! Run aborted, no active network  ")
             return False
         iterations = self._active_model.iteration_bunch(200)
         if self.config["UI"].getboolean("verbose"):
-            print("! Model is run on network, " + str(nr_iterations) + " iterations")
+            print("Qu: Model ran, " + str(nr_iterations) + " iterations")
         if self.config["UI"].getboolean("headless"):
             return True
         else:
             if self.config["UI"].getboolean("verbose"):
-                print("Generating network plot ... ")
+                print("Qu: Generating network plot ... ")
             self.plot_networks()
             if self.config["UI"].getboolean("verbose"):
-                print("Generating trend plot ... ")
+                print("Qu: Generating trend plot ... ")
             self.plot_trends(iterations)
             return True
 
@@ -92,8 +105,8 @@ def main():
 
     config_file = "quarantaine.cfg"
     simulator = Simulator(config_file)
-    simulator.create_network(0,1000,0.1,"network.cfg")
-    simulator.plot_networks()
+    simulator.create_model("SIR",simulator.create_network(0,1000,0.1,"network.cfg"))
+    simulator.run(200)
 
 if __name__ == "__main__":
         main()

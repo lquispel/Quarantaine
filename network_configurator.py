@@ -48,7 +48,6 @@ class Network_Configurator:
         counter = 0
         # families
         while counter < self.config["GENERAL"].getint("number_of_families"):
-            # TODO: implement randomzing family size
             subcounter = 0
             node_numbers = []
             while subcounter < self.config["FAMILIES"].getint("number_of_fathermothers"):
@@ -58,7 +57,7 @@ class Network_Configurator:
                 self.node_number += 1
                 subcounter += 1
                 self.network.nodes[self.node_number - 1][
-                "employable"] = "EMPLOYABLE"  # only 1 parent works. TODO: make this more elaborate
+                "employable"] = "EMPLOYABLE"
             subcounter = 0
             while subcounter < self.config["FAMILIES"].getint("family_size") - self.config["FAMILIES"].getint(
                     "number_of_fathermothers"):
