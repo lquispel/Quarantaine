@@ -91,25 +91,24 @@ class Network_Configurator:
                             self.network.add_edge(number1, number2, relation="LIVING_TOGETHER")
             if self.__verbose:
                 print(logstring)
-            logstring += "\n"
-            self.log.append(logstring)
+            self.log.append(logstring + "\n")
             counter += 1
 
     def create_schools(self):
         school_size = 0
         school_count = 0
-        print("node:" + str(self.node_number))
         for index in range(0, self.node_number - 1):
             if school_size == 0:
                 if school_count:
-                    print(logstring)
-                    self.log.append(logstring)
+                    if self.__verbose:
+                        print(logstring)
+                    self.log.append(logstring + "\n")
                 self.network.add_node(self.node_number, type="school", state="OPEN")
                 node = self.get_random_node("employable", "EMPLOYABLE")
                 self.network.nodes[node]["employable"] = "EMPLOYED"
                 self.network.add_edge(self.node_number, node, relation="EMPLOYMENT", sector="EDUCATION")
                 school_count += 1
-                logstring = "Qu Creating school " + str(school_count) + ", u" + str(self.node_number) + ": teacher: " + str(node) + " pupils: "
+                logstring = "Qu: Creating school " + str(school_count) + ", u" + str(self.node_number) + ": teacher: " + str(node) + " pupils: "
                 self.node_number += 1
                 school_size = self.config["INSTITUTIONS"].getint("school_size")
             if self.network.nodes[index]["age"] == "CHILD":
@@ -117,26 +116,35 @@ class Network_Configurator:
                 school_size -= 1
                 logstring += str(index) + ","
         if school_size != 0:
-            print(logstring)
-            self.log.append(logstring)
+            if self.__verbose:
+                print(logstring)
+            self.log.append(logstring + "\n")
         return school_count
 
-
-    def create_companies(self):
-        if self.config["CONNECTIONS"].getboolean("use_companies"):
-            employees = self.config["CONNECTIONS"].getint("company_size")
-            self.network.add_node(self.node_number, type="company", state="OPEN")
-            self.node_number += 1
-            for index in range(0, self.node_number - 2):
-                if 'employable' in self.network.nodes[index]:
-                    if self.network.nodes[index]["employable"] == "EMPLOYABLE":
-                        self.network.nodes[index]["employable"] == "EMPLOYED"
-                        self.network.add_edge(index, self.node_number - 1, relation="EMPLOYMENT")
-                        employees -= 1
-                        if employees < 0:
-                            employees = self.config["CONNECTIONS"].getint("company_size")
-                            self.network.add_node(self.node_number, type="company", state="OPEN")
-                            self.node_number += 1
+    def create_organisation(self,organisation_type,organisation_size,organisation_key,organisation_value,organisation_sector=""):
+        organisation_count = 0
+        size = 0
+        logstring = ""
+        for index in range(0, self.node_number - 1):
+            if size == 0:
+                if organisation_count:
+                    if self.__verbose:
+                        print(logstring)
+                    self.log.append(logstring + "\n")
+                size = organisation_size
+                organisation_count += 1
+                self.network.add_node(self.node_number, type=organisation_type, state="OPEN")
+                logstring = "Qu: Creating " + str(organisation_type) + " organisation " + str(organisation_count) + ", o" + str(self.node_number) + " , members: "
+                self.node_number += 1
+            if organisation_key in self.network.nodes[index]:
+                if self.network.nodes[index][organisation_key] == organisation_value:
+                    self.network.add_edge(index, self.node_number, relation=organisation_type,sector=organisation_sector)
+                    logstring += str(index) + ", "
+                    size -= 1
+        if size != 0:
+            if self.__verbose:
+                print(logstring)
+            self.log.append(logstring+ "\n")
 
     def generate_from_file(self,type,nodes,connectiviy,configfile):
         self.config = configparser.ConfigParser()
@@ -148,5 +156,6 @@ class Network_Configurator:
         self.create_families()
         if self.config["INSTITUTIONS"].getboolean("use_schools"):
             schools_created = self.create_schools()
+        self.create_organisation("COMPANY",5,"employable","EMPLOYABLE")
         return self.network
 
