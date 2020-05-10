@@ -33,17 +33,18 @@ class Network_Configurator:
                 searching = False
         return gamble
 
-    def create_persons(self):
-        # singles
+    def create_singles(self):
         counter = 0
-        logstring = "Qu Creating: "
         while counter < self.config["GENERAL"].getint("number_of_singles"):
+            if self.__verbose:
+                print ( "Qu Creating single: s" + str(self.node_number) )
+            self.log.append( "Qu Creating single: s" + str(self.node_number) )
             self.network.add_node(self.node_number, type="person", state="SUSCEPTIBLE", age="ADULT", employable="EMPLOYABLE",
                              living="LIVING_SINGLE")
             counter += 1
             self.node_number += 1
-        counter = 0
-        # couples
+
+    def create_couples(self):
         while counter < self.config["GENERAL"].getint("number_of_couples"):
             self.network.add_node(self.node_number, type="person", state="SUSCEPTIBLE", age="ADULT", employable="EMPLOYABLE",
                              living="LIVING_COUPLE")
@@ -56,9 +57,9 @@ class Network_Configurator:
         counter = 0
 
     def create_families(self):
-        logstring = "Creating family: "
         counter = 0
         while counter < self.config["GENERAL"].getint("number_of_families"):
+            logstring = "Qu: Creating family " + str(counter) + ": "
             subcounter = 0
             node_numbers = []
             while subcounter < self.config["FAMILIES"].getint("number_of_fathermothers"):
@@ -81,7 +82,6 @@ class Network_Configurator:
                 for number2 in node_numbers:
                     if number1 != number2:
                         if self.network.has_edge(number1, number2) == False:
-                            print("edge from " + str(number1) + " to " + str(number2))
                             self.network.add_edge(number1, number2, relation="LIVING_TOGETHER")
             if self.__verbose:
                 print(logstring)
@@ -131,6 +131,7 @@ class Network_Configurator:
         self.config.read(configfile)
         self.network = networkx.Graph()
         self.node_number = 0
+        self.create_singles()
         self.create_families()
         return self.network
 
