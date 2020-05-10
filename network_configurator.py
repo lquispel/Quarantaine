@@ -62,7 +62,6 @@ class Network_Configurator:
             self.network.add_edge(self.node_number - 1, self.node_number - 2, relation="LIVING_TOGETHER")
             counter += 1
 
-
     def create_families(self):
         counter = 0
         while counter < self.config["GENERAL"].getint("number_of_families"):
@@ -96,26 +95,32 @@ class Network_Configurator:
             self.log.append(logstring)
             counter += 1
 
-
-
     def create_schools(self):
-        children = self.config["CONNECTIONS"].getint("school_size")
-        self.network.add_node(self.node_number, type="school", state="OPEN")
-        node = self.get_random_node("employable","EMPLOYABLE")
-        self.network.nodes[node]["employable"] = "EMPLOYED"
-        self.network.add_edge(self.node_number,node,relation="EMPLOYMENT")
-        self.node_number += 1
-        for index in range(0, self.node_number - 2):
+        school_size = 0
+        school_count = 0
+        print("node:" + str(self.node_number))
+        for index in range(0, self.node_number - 1):
+            if school_size == 0:
+                if school_count:
+                    print(logstring)
+                    self.log.append(logstring)
+                self.network.add_node(self.node_number, type="school", state="OPEN")
+                node = self.get_random_node("employable", "EMPLOYABLE")
+                self.network.nodes[node]["employable"] = "EMPLOYED"
+                self.network.add_edge(self.node_number, node, relation="EMPLOYMENT", sector="EDUCATION")
+                school_count += 1
+                logstring = "Qu Creating school " + str(school_count) + ", u" + str(self.node_number) + ": teacher: " + str(node) + " pupils: "
+                self.node_number += 1
+                school_size = self.config["INSTITUTIONS"].getint("school_size")
             if self.network.nodes[index]["age"] == "CHILD":
-                self.network.add_edge(index, self.node_number-1, relation="ATTENDING")
-                children -= 1
-                if children < 0:
-                    children = self.config["CONNECTIONS"].getint("school_size")
-                    self.network.add_node(self.node_number, type="school", state="OPEN")
-                    node = self.get_random_node("employable", "EMPLOYABLE")
-                    self.network.nodes[node]["employable"] = "EMPLOYED"
-                    self.network.add_edge(self.node_number, node, relation="EMPLOYMENT")
-                    self.node_number += 1
+                self.network.add_edge(index, self.node_number-1, relation="ATTENDING",sector="EDUCATION")
+                school_size -= 1
+                logstring += str(index) + ","
+        if school_size != 0:
+            print(logstring)
+            self.log.append(logstring)
+        return school_count
+
 
     def create_companies(self):
         if self.config["CONNECTIONS"].getboolean("use_companies"):
@@ -141,5 +146,7 @@ class Network_Configurator:
         self.create_singles()
         self.create_couples()
         self.create_families()
+        if self.config["INSTITUTIONS"].getboolean("use_schools"):
+            schools_created = self.create_schools()
         return self.network
 
