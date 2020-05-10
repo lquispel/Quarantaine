@@ -36,25 +36,32 @@ class Network_Configurator:
     def create_singles(self):
         counter = 0
         while counter < self.config["GENERAL"].getint("number_of_singles"):
+            logstring = "Qu Creating single: s" + str(self.node_number)
             if self.__verbose:
-                print ( "Qu Creating single: s" + str(self.node_number) )
-            self.log.append( "Qu Creating single: s" + str(self.node_number) )
+                print (logstring)
+            self.log.append( logstring )
             self.network.add_node(self.node_number, type="person", state="SUSCEPTIBLE", age="ADULT", employable="EMPLOYABLE",
                              living="LIVING_SINGLE")
             counter += 1
             self.node_number += 1
 
     def create_couples(self):
+        counter = 0
         while counter < self.config["GENERAL"].getint("number_of_couples"):
+            logstring = "Qu Creating Couple: c" + str(self.node_number)
             self.network.add_node(self.node_number, type="person", state="SUSCEPTIBLE", age="ADULT", employable="EMPLOYABLE",
                              living="LIVING_COUPLE")
             self.node_number += 1
+            logstring += " s" + str(self.node_number)
+            if self.__verbose:
+                print(logstring)
+            self.log.append(logstring + "\n" )
             self.network.add_node(self.node_number, type="person", state="SUSCEPTIBLE", age="ADULT", employable="UNEMPLOYABLE",
                              living="LIVING_COUPLE")
             self.node_number += 1
             self.network.add_edge(self.node_number - 1, self.node_number - 2, relation="LIVING_TOGETHER")
             counter += 1
-        counter = 0
+
 
     def create_families(self):
         counter = 0
@@ -132,6 +139,7 @@ class Network_Configurator:
         self.network = networkx.Graph()
         self.node_number = 0
         self.create_singles()
+        self.create_couples()
         self.create_families()
         return self.network
 
