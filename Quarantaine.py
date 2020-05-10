@@ -1,5 +1,6 @@
 
 import configparser
+import datetime
 
 # import ndlib modules
 # model modules
@@ -47,11 +48,12 @@ class Simulator:
         m = vm.plot()
         show(m)
 
-    def create_network(self,type,nodes,connectivity,configfile=0):
-        if self.config["UI"].getboolean("verbose"):
-            print("Qu: Creating network ...  ")
+    def create_network(self,type,nodes,connectivity,config_file=0):
         # Network Definition
-        if configfile != 0:
+        if config_file != 0:
+            configfile = self.config["PATHS"]["config_path"] + config_file
+            if self.config["UI"].getboolean("verbose"):
+                print("Qu: Creating network from " + configfile)
             generator = network_configurator.Network_Configurator(self.config["UI"].getboolean("verbose"))
             self._active_network = generator.generate_from_file(type,nodes,connectivity,configfile)
         else:
@@ -59,6 +61,14 @@ class Simulator:
                 self._active_network = nx.erdos_renyi_graph(nodes, 0.1, 1000)
             else:
                 self._active_network = 0
+        if self.config["OPERATION"].getboolean("save_network"):
+            nx.write_graphml(self._active_network,self.config["PATHS"]["output_path"] + "network.graphml")
+        if self.config["OPERATION"].getboolean("save_network_creation_log"):
+            logfile = open(self.config["PATHS"]["output_path"] + "creation.log", "wt")
+            logfile.write("Quarantaine Network Creation Log. File processed: " + configfile + ", date: " + str(datetime.datetime.now()) + "\n")
+            for line in generator.log:
+                logfile.write(line)
+
         return self._active_network
 
     def create_model(self,model_type,network):
@@ -104,7 +114,7 @@ class Simulator:
 
 def main():
 
-    config_file = "quarantaine.cfg"
+    config_file = "Config/quarantaine.cfg"
     simulator = Simulator(config_file)
     simulator.create_model("SIR",simulator.create_network(0,1000,0.1,"network.cfg"))
     simulator.run(200)
