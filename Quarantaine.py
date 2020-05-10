@@ -29,7 +29,8 @@ class Simulator:
     def plot_networks(self):
         if self.config["UI"].getboolean("verbose"):
             print("Qu: Plotting networks ... ")
-        nx.draw(self._active_network, with_labels=True)
+        nx.draw_networkx(self._active_network, with_labels=True)
+        nx.write_graphml(self._active_network,"network.gra")
         plt.show()
 
     def plot_trends(self,iterations):
@@ -51,7 +52,7 @@ class Simulator:
             print("Qu: Creating network ...  ")
         # Network Definition
         if configfile != 0:
-            generator = network_configurator.Network_Configurator()
+            generator = network_configurator.Network_Configurator(self.config["UI"].getboolean("verbose"))
             self._active_network = generator.generate_from_file(type,nodes,connectivity,configfile)
         else:
             if type == 0:
@@ -98,7 +99,7 @@ class Simulator:
             self.plot_networks()
             if self.config["UI"].getboolean("verbose"):
                 print("Qu: Generating trend plot ... ")
-            self.plot_trends(iterations)
+            #self.plot_trends(iterations)
             return True
 
 def main():
