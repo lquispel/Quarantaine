@@ -5,14 +5,16 @@ import datetime
 # import ndlib modules
 # model modules
 import networkx as nx
-import ndlib.models.epidemics as ep
 import ndlib.models.ModelConfig as mc
+import ndlib.models.CompositeModel as gc
+import ndlib.models.compartments.EdgeStochastic as es
 # visualization modules
 import matplotlib.pyplot as plt
 from bokeh.io import output_notebook, show
 from ndlib.viz.bokeh.DiffusionTrend import DiffusionTrend
 from ndlib.viz.bokeh.DiffusionPrevalence import DiffusionPrevalence
 from ndlib.viz.bokeh.MultiPlot import MultiPlot
+
 
 # import Quarantaine modules
 import network_configurator
@@ -31,7 +33,6 @@ class Simulator:
         if self.config["UI"].getboolean("verbose"):
             print("Qu: Plotting networks ... ")
         nx.draw_networkx(self._active_network, with_labels=True)
-        nx.write_graphml(self._active_network,"network.gra")
         plt.show()
 
     def plot_trends(self,iterations):
@@ -76,13 +77,12 @@ class Simulator:
             print("Qu: Creating model ...  ")
         # Model Selection
         if model_type == 'SIR':
-            self._active_model = ep.SIRModel(network)
+            self._active_model = generate_model(self._active_network)
         else:
             self._active_model = 0
         # Model Configuration
+        # iterations = model.iteration_bunch(5)
         config = mc.Configuration()
-        config.add_model_parameter('beta', 0.001)
-        config.add_model_parameter('gamma', 0.01)
         config.add_model_parameter("fraction_infected", 0.05)
         self._active_model.set_initial_status(config)
         return self._active_model
