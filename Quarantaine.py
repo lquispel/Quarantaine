@@ -83,7 +83,7 @@ class Simulator:
             self._active_model = 0
         # Model Configuration
         config = mc.Configuration()
-        config.add_model_parameter("fraction_infected", 0.05)
+        config.add_model_parameter("fraction_infected", 0.01)
         self._active_model.set_initial_status(config)
         return self._active_model
 
@@ -104,9 +104,9 @@ class Simulator:
         if self.config["UI"].getboolean("headless"):
             return True
         else:
-            if self.config["UI"].getboolean("verbose"):
-                print("Qu: Generating network plot ... ")
-            self.plot_networks()
+            #if self.config["UI"].getboolean("verbose"):
+            #    print("Qu: Generating network plot ... ")
+            # self.plot_networks()
             if self.config["UI"].getboolean("verbose"):
                 print("Qu: Generating trend plot ... ")
             self.plot_trends(iterations)
@@ -117,7 +117,7 @@ def main():
     config_file = "Config/quarantaine.cfg"
     simulator = Simulator(config_file)
     simulator.create_model("SIR",simulator.create_network(0,1000,0.1,"network.cfg"))
-    simulator.run(200)
+    simulator.run(29+31+30+5)  # february 1 - may 5
 
 if __name__ == "__main__":
         main()
