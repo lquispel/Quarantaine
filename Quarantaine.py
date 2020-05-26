@@ -18,6 +18,7 @@ from ndlib.viz.bokeh.MultiPlot import MultiPlot
 
 # import Quarantaine modules
 import network_configurator
+import SICR_model
 
 class Simulator:
 
@@ -77,11 +78,10 @@ class Simulator:
             print("Qu: Creating model ...  ")
         # Model Selection
         if model_type == 'SIR':
-            self._active_model = generate_model(self._active_network)
+            self._active_model = SICR_model.generate_model(self._active_network)
         else:
             self._active_model = 0
         # Model Configuration
-        # iterations = model.iteration_bunch(5)
         config = mc.Configuration()
         config.add_model_parameter("fraction_infected", 0.05)
         self._active_model.set_initial_status(config)
@@ -109,7 +109,7 @@ class Simulator:
             self.plot_networks()
             if self.config["UI"].getboolean("verbose"):
                 print("Qu: Generating trend plot ... ")
-            #self.plot_trends(iterations)
+            self.plot_trends(iterations)
             return True
 
 def main():
