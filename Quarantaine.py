@@ -2,8 +2,6 @@
 import configparser
 import datetime
 
-# import ndlib modules
-# model modules
 import networkx as nx
 import ndlib.models.ModelConfig as mc
 import ndlib.models.CompositeModel as gc
