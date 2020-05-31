@@ -1,0 +1,5 @@
+- betere visualisatie
+- Leeftijd toevogen ? Dat moet dan ook in families
+- Hospitalisatie ? Dan ook IC toevoegen
+- Sociaal netwerk toevoegen aan netwerk
+
